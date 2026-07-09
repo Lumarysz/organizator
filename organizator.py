@@ -24,14 +24,8 @@ if Path("/etc/portage/package.use").is_dir():
                     classe = processado[0].split("/", maxsplit=1)[0]
                     package = processado[0].split("/", maxsplit=1)[1]
 
-                elif ("/" in line) and (" " not in line):
-                    processado = line.split("/", maxsplit=1)
-                    classe = processado[0].strip()
-                    package = processado[1].strip()
-
-                elif ("/" in line) and (" " not in line):
-                    print(f"Erro: A linha '{line.strip()}' não contém opções USE.")
-                    sys.exit()
+                elif (("/" in line) and (" " not in line)) or (("/" in line) and (" " not in line)):
+                    
                 
 
                 filepath = f"/etc/portage/package.use/{classe}/{package}"

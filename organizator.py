@@ -29,13 +29,16 @@ for j in usedir.glob("*"):
                 processado = line.split(" ", maxsplit=1)
                 use = processado[1].strip()
                 package = processado[0]
-                global FILEPATH
-                FILEPATH = Path(f"/etc/portage/package.use/{package}")
 
                 dicionário[package] = use
+
+for
 
 shutil.rmtree(use)
 usedir.mkdir(parents=True, exist_ok=True)
 
 for k in dicionário:
-    print(k.value())
+    filepath = Path(f"/etc/portage/package.use/{k}")
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    with open(file=filepath) as f:
+        f.write(f"{k} {dicionário[k]}")

@@ -15,7 +15,7 @@ if Path("/etc/portage/package.use").is_dir():
         with open(j, "r", encoding="utf-8") as f:
             for line in f:
                 if not line.strip() or line.strip().startswith("#"):
-                    continue  # Ignora linhas vazias ou comentários
+                    continue  # Ignora linhas vazias ou comentários.
 
                 print(f"Processando a linha: {line}")
                 if (" " in line) and ("/" in line):
@@ -23,6 +23,12 @@ if Path("/etc/portage/package.use").is_dir():
                     use = processado[1].strip()
                     classe = processado[0].split("/", maxsplit=1)[0]
                     package = processado[0].split("/", maxsplit=1)[1]
+
+                elif ("/" in line) and (" " not in line):
+                    processado = line.split("/", maxsplit=1)
+                    classe = processado[0].strip()
+                    package = processado[1].strip()
+
                 elif ("/" in line) and (" " not in line):
                     print(f"Erro: A linha '{line.strip()}' não contém opções USE.")
                     sys.exit()

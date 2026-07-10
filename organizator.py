@@ -15,7 +15,7 @@ rule2 = r"^([^./\\, ]+)\/([^./\\, ]+) " #correto sem use flags
 lista = []
 usedir = Path("/etc/portage/package.use")
 
-if usedir.exists and usedir.is_dir():
+if usedir.exists() and usedir.is_dir():
     for j in usedir.glob("*"):
         print(f"Processando o ficheiro: {j}")
         with open(j, "r", encoding="utf-8") as f:
@@ -43,6 +43,7 @@ if usedir.exists and usedir.is_dir():
         else:
             vistos.add(y)
     nao_repetidos = list(vistos - repetidos)
+    nao_repetidos_final = [tuple(h, lista[h]) for h in nao_repetidos]
 
     hello = {}
 
@@ -59,7 +60,7 @@ if usedir.exists and usedir.is_dir():
     for v in hello:
         g = hello.get(v)
         clean_list.append((v, g))
-    clean_list = clean_list + nao_repetidos
+    clean_list = clean_list + nao_repetidos_final
 
     shutil.rmtree(usedir)
     usedir.mkdir(parents=True, exist_ok=True)

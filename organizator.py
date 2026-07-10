@@ -11,36 +11,41 @@ if os.getuid() != 0:
     sys.exit(1)
 
 rule1 = r"^([^./\\, ]+)\/([^./\\, ]+) ([a-zA-Z0-9_+\-]+(?: (?:-[a-zA-Z0-9_+\-]+|[a-zA-Z0-9_\-]+[a-zA-Z0-9_+\-]*))*)$" # LINHA CORRETA
-rule2 = r"^([^./\\, ]+)\/([^./\\, ]+) " #correto sem use flags
+rule2 = r"^([^./\\, ]+)\/([^./\\, ]+)$" #correto sem use flags
 lista = []
 usedir = Path("/etc/portage/package.use")
 
 if usedir.exists() and usedir.is_dir():
     print(f'"{usedir}" exists.')
     for j in usedir.glob("*"):
-        print(f"Processando o ficheiro: {j}")
-        with open(j, "r", encoding="utf-8") as f:
-            for line in f:
-                if not line.strip() or line.strip().startswith("#"):
-                    print("Saltando linha.")
-                    continue  # Ignora linhas vazias ou comentários.
+        if j.is_file():
+            print(f"Processando o ficheiro: {j}")
+            with open(j, "r", encoding="utf-8") as f:
+                for line in f:
+                    if not line.strip() or line.strip().startswith("#"):
+                        print("Saltando linha.")
+                        continue  # Ignora linhas vazias ou comentários.
 
-                elif re.fullmatch(pattern=rule2, string=line.strip()):
-                    print(f'A linha "{line.strip()}", do ficheiro "{j}" não contém flags de USE. Ignorando.')
-                    print('Saltando linha.')
-                    continue  # Ignora linhas sem use flags
+                    elif re.fullmatch(pattern=rule2, string=line.strip()):
+                        print(f'A linha "{line.strip()}", do ficheiro "{j}" não contém flags de USE. Ignorando.')
+                        print('Saltando linha.')
+                        continue  # Ignora linhas sem use flags
 
-                elif re.fullmatch(pattern=rule1, string=line.strip()):
-                    processado = line.split(" ", maxsplit=1)
+                    elif re.fullmatch(pattern=rule1, string=line.strip()):
+                        processado = line.split(" ", maxsplit=1)
 
-                    package = processado[0]
-                    print(f'Pacote: {package}.')
-                    use = processado[1].strip()
-                    print(f'Use flags: {use}.')
+                        package = processado[0]
+                        print(f'Pacote: {package}.')
+                        use = processado[1].strip()
+                        print(f'Use flags: {use}.')
 
-                    lista.append((package, use))
+                        lista.append((package, use))
+        elif j.is_file() is False:
+            continue
+        else:
+            print('Erro')
 
-    itens = [lista[0] for i in lista]
+    itens = [item[0] for item in lista]
     vistos = set()
     repetidos = set()
     for y in itens:

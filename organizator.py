@@ -34,7 +34,7 @@ if usedir.exists and usedir.is_dir():
 
                     lista.append((package, use))
 
-    itens = [lista[i][1] for i in lista]
+    itens = [lista[i][0] for i in lista]
     vistos = set()
     repetidos = set()
     for y in itens:
@@ -42,15 +42,30 @@ if usedir.exists and usedir.is_dir():
             repetidos.add(y)
         else:
             vistos.add(y)
+    nao_repetidos = list(vistos - repetidos)
+
+    hello = {}
 
     for p in repetidos:
-        for 
+        for a, b in lista: # use = b, pacote = a
+            if a == p:
+                if a in hello:
+                    hello[a] = hello[a] + b # valor antigo + o atual
+                elif a not in hello:
+                    hello[a] = b
+    
+    clean_list = []
+
+    for v in hello:
+        g = hello.get(v)
+        clean_list.append((v, g))
+    clean_list = clean_list + nao_repetidos
 
     shutil.rmtree(usedir)
     usedir.mkdir(parents=True, exist_ok=True)
 
-    for k in lista:
-        filepath = Path(f"/etc/portage/package.use/{k}")
+    for k in clean_list:
+        filepath = Path(f"/etc/portage/package.use/{k[1]}/{k[2]}")
         filepath.parent.mkdir(parents=True, exist_ok=True)
-        with open(file=filepath) as f:
-            f.write(f"{lista[k][1]} {lista[k][2]}")
+        with open(file=filepath, mode='w', encoding='utf-8') as f:
+            f.write(f"{clean_list[k][1]} {clean_list[k][2]}")

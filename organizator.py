@@ -12,33 +12,45 @@ if os.getuid() != 0:
 
 rule1 = r"^([^./\\, ]+)\/([^./\\, ]+) ([a-zA-Z0-9_+\-]+(?: (?:-[a-zA-Z0-9_+\-]+|[a-zA-Z0-9_\-]+[a-zA-Z0-9_+\-]*))*)$" # LINHA CORRETA
 rule2 = r"^([^./\\, ]+)\/([^./\\, ]+) " #correto sem use flags
-dicionário = []
+lista = []
 usedir = Path("/etc/portage/package.use")
-for j in usedir.glob("*"):
-    print(f"Processando o ficheiro: {j}")
-    with open(j, "r", encoding="utf-8") as f:
-        for line in f:
-            if not line.strip() or line.strip().startswith("#"):
-                continue  # Ignora linhas vazias ou comentários.
 
-            elif re.fullmatch(pattern=rule2, string=line.strip()):
-                print(f'A linha "{line.strip()}", do ficheiro "{j}" não contém flags de USE. Ignorando.')
-                continue  # Ignora linhas sem use flags
+if usedir.exists and usedir.is_dir():
+    for j in usedir.glob("*"):
+        print(f"Processando o ficheiro: {j}")
+        with open(j, "r", encoding="utf-8") as f:
+            for line in f:
+                if not line.strip() or line.strip().startswith("#"):
+                    continue  # Ignora linhas vazias ou comentários.
 
-            elif re.fullmatch(pattern=rule1, string=line.strip):
-                processado = line.split(" ", maxsplit=1)
-                use = processado[1].strip()
-                package = processado[0]
+                elif re.fullmatch(pattern=rule2, string=line.strip()):
+                    print(f'A linha "{line.strip()}", do ficheiro "{j}" não contém flags de USE. Ignorando.')
+                    continue  # Ignora linhas sem use flags
 
-                dicionário[package] = use
+                elif re.fullmatch(pattern=rule1, string=line.strip()):
+                    processado = line.split(" ", maxsplit=1)
+                    use = processado[1].strip()
+                    package = processado[0]
 
-for
+                    lista.append((package, use))
 
-shutil.rmtree(use)
-usedir.mkdir(parents=True, exist_ok=True)
+    itens = [lista[i][1] for i in lista]
+    vistos = set()
+    repetidos = set()
+    for y in itens:
+        if y in vistos:
+            repetidos.add(y)
+        else:
+            vistos.add(y)
 
-for k in dicionário:
-    filepath = Path(f"/etc/portage/package.use/{k}")
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-    with open(file=filepath) as f:
-        f.write(f"{k} {dicionário[k]}")
+    for p in repetidos:
+        for 
+
+    shutil.rmtree(usedir)
+    usedir.mkdir(parents=True, exist_ok=True)
+
+    for k in lista:
+        filepath = Path(f"/etc/portage/package.use/{k}")
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+        with open(file=filepath) as f:
+            f.write(f"{lista[k][1]} {lista[k][2]}")

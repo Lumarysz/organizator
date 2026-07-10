@@ -16,25 +16,31 @@ lista = []
 usedir = Path("/etc/portage/package.use")
 
 if usedir.exists() and usedir.is_dir():
+    print(f'"{usedir}" exists.')
     for j in usedir.glob("*"):
         print(f"Processando o ficheiro: {j}")
         with open(j, "r", encoding="utf-8") as f:
             for line in f:
                 if not line.strip() or line.strip().startswith("#"):
+                    print("Saltando linha.")
                     continue  # Ignora linhas vazias ou comentários.
 
                 elif re.fullmatch(pattern=rule2, string=line.strip()):
                     print(f'A linha "{line.strip()}", do ficheiro "{j}" não contém flags de USE. Ignorando.')
+                    print('Saltando linha.')
                     continue  # Ignora linhas sem use flags
 
                 elif re.fullmatch(pattern=rule1, string=line.strip()):
                     processado = line.split(" ", maxsplit=1)
-                    use = processado[1].strip()
+
                     package = processado[0]
+                    print(f'Pacote: {package}.')
+                    use = processado[1].strip()
+                    print(f'Use flags: {use}.')
 
                     lista.append((package, use))
 
-    itens = [lista[i][0] for i in lista]
+    itens = [lista[0] for i in lista]
     vistos = set()
     repetidos = set()
     for y in itens:
@@ -42,8 +48,10 @@ if usedir.exists() and usedir.is_dir():
             repetidos.add(y)
         else:
             vistos.add(y)
+    print(f'Repetidos: {repetidos}')
     nao_repetidos = list(vistos - repetidos)
-    nao_repetidos_final = [tuple(h, lista[h]) for h in nao_repetidos]
+    nao_repetidos_final = [par for par in lista if par[0] in nao_repetidos]
+    print(f'Não repetidos: {nao_repetidos_final}')
 
     hello = {}
 
@@ -51,7 +59,7 @@ if usedir.exists() and usedir.is_dir():
         for a, b in lista: # use = b, pacote = a
             if a == p:
                 if a in hello:
-                    hello[a] = hello[a] + b # valor antigo + o atual
+                    hello[a] = hello[a] + " " + b # valor antigo + o atual
                 elif a not in hello:
                     hello[a] = b
     
@@ -62,11 +70,14 @@ if usedir.exists() and usedir.is_dir():
         clean_list.append((v, g))
     clean_list = clean_list + nao_repetidos_final
 
+    print(f'Apagando e recriando pasta: {usedir}')
     shutil.rmtree(usedir)
     usedir.mkdir(parents=True, exist_ok=True)
 
     for k in clean_list:
-        filepath = Path(f"/etc/portage/package.use/{k[1]}/{k[2]}")
+        filepath = Path(f"/etc/portage/package.use/{k[0]}")
         filepath.parent.mkdir(parents=True, exist_ok=True)
         with open(file=filepath, mode='w', encoding='utf-8') as f:
-            f.write(f"{clean_list[k][1]} {clean_list[k][2]}")
+            escrever = f"{k[0]} {k[1]}\n"
+            f.write(escrever)
+            print(f'Editando {filepath}, escrevendo "{escrever}".')
